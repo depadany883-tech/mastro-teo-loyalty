@@ -19,7 +19,7 @@ const CONFIG = {
   PREMI: [
     { soglia: 200, nome: "10€ di sconto" },
     { soglia: 350, nome: "20€ di sconto" },
-    { soglia: 500, nome: "2 scatole omaggio" },
+    { soglia: 600, nome: "2 scatole omaggio" },
   ],
   NOME_AZIENDA: "Le delizie di Mastro Teo",
   AGENTI: ["Marco", "Luca", "Sara"], // modifica con i nomi reali dei tuoi agenti
