@@ -31,11 +31,27 @@ const SHEETDB_BASE = `https://sheetdb.io/api/v1/${CONFIG.SHEETDB_API_ID}`;
 
 function normPiva(v){ return (v || "").replace(/\s+/g, "").toUpperCase().trim(); }
 
+// SheetDB (piano gratuito) può rifiutare richieste troppo ravvicinate.
+// Questo helper ritenta automaticamente dopo una breve pausa prima di arrendersi.
+async function sheetdbFetch(url, options, tentativi = 3, attesaMs = 700){
+  let ultimoErrore;
+  for(let i = 0; i < tentativi; i++){
+    if(i > 0) await new Promise(r => setTimeout(r, attesaMs));
+    try{
+      const res = await fetch(url, options);
+      if(res.ok) return res;
+      ultimoErrore = new Error(`Richiesta fallita (${res.status})`);
+    }catch(e){
+      ultimoErrore = e;
+    }
+  }
+  throw ultimoErrore;
+}
+
 // Helper: cerca un cliente per P.IVA nel foglio "clienti"
 async function trovaCliente(piva){
   const url = `${SHEETDB_BASE}/search?sheet=clienti&piva=${encodeURIComponent(normPiva(piva))}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error("Errore ricerca cliente");
+  const res = await sheetdbFetch(url);
   const rows = await res.json();
   return rows && rows.length ? rows[0] : null;
 }
@@ -43,8 +59,7 @@ async function trovaCliente(piva){
 // Helper: recupera TUTTI gli ordini di un cliente (per calcolare il saldo)
 async function tuttiOrdiniCliente(piva){
   const url = `${SHEETDB_BASE}/search?sheet=ordini&piva=${encodeURIComponent(normPiva(piva))}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error("Errore ricerca ordini");
+  const res = await sheetdbFetch(url);
   const rows = await res.json();
   rows.sort((a, b) => new Date(b.data) - new Date(a.data));
   return rows;

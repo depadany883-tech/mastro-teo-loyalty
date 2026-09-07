@@ -226,22 +226,20 @@ document.querySelectorAll('.tab').forEach(tab=>{
 let clienteCorrente = null;
 
 async function creaCliente(cliente){
-  const res = await fetch(`${SHEETDB_BASE}?sheet=clienti`, {
+  const res = await sheetdbFetch(`${SHEETDB_BASE}?sheet=clienti`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ data: [cliente] })
   });
-  if(!res.ok) throw new Error('Errore creazione cliente');
   return res.json();
 }
 
 async function creaOrdine(ordine){
-  const res = await fetch(`${SHEETDB_BASE}?sheet=ordini`, {
+  const res = await sheetdbFetch(`${SHEETDB_BASE}?sheet=ordini`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ data: [ordine] })
   });
-  if(!res.ok) throw new Error('Errore registrazione ordine');
   return res.json();
 }
 
@@ -362,8 +360,7 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
   btn.disabled = true; btn.textContent = 'Caricamento...';
   try{
     const url = `${SHEETDB_BASE}/search?sheet=clienti&agenteRif=${encodeURIComponent(agente)}`;
-    const res = await fetch(url);
-    if(!res.ok) throw new Error('Errore ricerca clienti');
+    const res = await sheetdbFetch(url);
     const clienti = await res.json();
 
     if(!clienti.length){
@@ -373,8 +370,7 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
     }
 
     // Un'unica chiamata per tutti gli ordini, poi sommo i punti per ogni cliente localmente
-    const resOrdini = await fetch(`${SHEETDB_BASE}?sheet=ordini`);
-    if(!resOrdini.ok) throw new Error('Errore ricerca ordini');
+    const resOrdini = await sheetdbFetch(`${SHEETDB_BASE}?sheet=ordini`);
     const tuttiOrdini = await resOrdini.json();
 
     clienti.forEach(c => {
