@@ -193,6 +193,26 @@
   .premio-nome{ font-size:13.5px; font-weight:600; }
   .premio-stato{ font-size:12px; opacity:.6; margin-top:1px; }
 
+  .premio-riga.oro{
+    background:rgba(201,138,44,0.08);
+    border-radius:8px;
+    padding:10px 10px;
+    margin:2px 0;
+    border-bottom:none;
+  }
+  .premio-riga.oro .premio-nome{ color:#9a6b1f; }
+  .premio-riga.oro .premio-check.no{ border-color:#C98A2C; color:#9a6b1f; }
+
+  .premio-riga.top{
+    background:linear-gradient(135deg, rgba(27,76,130,0.10), rgba(107,39,55,0.08));
+    border-radius:8px;
+    padding:10px 10px;
+    margin:2px 0 0;
+    border-bottom:none;
+  }
+  .premio-riga.top .premio-nome{ color:var(--blue-deep); font-weight:700; }
+  .premio-riga.top .premio-check.no{ border-color:var(--blue-deep); }
+
   .storico{ margin-top:24px; }
   .storico h3{
     font-size:11px;
@@ -302,10 +322,12 @@ document.getElementById('btn-verifica').addEventListener('click', async ()=>{
     pronto.classList.toggle('hidden', !ultimoSbloccato);
     pronto.textContent = ultimoSbloccato ? ultimoSbloccato.nome + ' raggiunto — parlane col tuo agente.' : '';
 
-    document.getElementById('rc-premi').innerHTML = CONFIG.PREMI.map(p => {
+    document.getElementById('rc-premi').innerHTML = CONFIG.PREMI.map((p, i) => {
       const ok = saldo >= p.soglia;
+      const posizioneDallaFine = CONFIG.PREMI.length - i;
+      const classeSpeciale = posizioneDallaFine === 2 ? 'oro' : (posizioneDallaFine === 1 ? 'top' : '');
       return `
-        <div class="premio-riga">
+        <div class="premio-riga ${classeSpeciale}">
           <div class="premio-check ${ok ? 'ok' : 'no'}">${ok ? '✓' : ''}</div>
           <div class="premio-testo">
             <div class="premio-nome">${p.nome}</div>

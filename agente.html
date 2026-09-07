@@ -118,6 +118,8 @@
   button:disabled{ opacity:.5; cursor:default; }
   .btn-primary{ background:var(--blue-deep); color:var(--paper); width:100%; margin-top:16px; }
   .btn-secondary{ background:transparent; color:var(--blue-deep); border:1px solid var(--line); width:100%; margin-top:10px; }
+  .btn-riscatta.oro{ border-color:#C98A2C; color:#9a6b1f; background:rgba(201,138,44,0.08); }
+  .btn-riscatta.top{ border-color:var(--blue-deep); color:var(--blue-deep); font-weight:700; background:linear-gradient(135deg, rgba(27,76,130,0.10), rgba(107,39,55,0.08)); }
 
   .msg{ font-size:13px; margin-top:10px; padding:10px 12px; border-radius:8px; }
   .msg.err{ background:rgba(178,52,52,0.08); color:#B23434; }
@@ -256,10 +258,14 @@ async function mostraClienteOrdine(c){
 
   const sbloccati = CONFIG.PREMI.filter(p => saldo >= p.soglia);
   document.getElementById('oc-premio-azione').classList.toggle('hidden', sbloccati.length === 0);
-  document.getElementById('oc-premi-riscattabili').innerHTML = sbloccati.map(p => `
-    <button class="btn-secondary btn-riscatta" data-soglia="${p.soglia}" data-nome="${p.nome}">
+  document.getElementById('oc-premi-riscattabili').innerHTML = sbloccati.map(p => {
+    const posizioneDallaFine = CONFIG.PREMI.length - CONFIG.PREMI.indexOf(p);
+    const classeSpeciale = posizioneDallaFine === 2 ? 'oro' : (posizioneDallaFine === 1 ? 'top' : '');
+    return `
+    <button class="btn-secondary btn-riscatta ${classeSpeciale}" data-soglia="${p.soglia}" data-nome="${p.nome}">
       Riscatta: ${p.nome} (−${p.soglia} punti)
-    </button>`).join('');
+    </button>`;
+  }).join('');
 
   if(!document.getElementById('agente-ordine').value){
     document.getElementById('agente-ordine').value = c.agenteRif || '';
