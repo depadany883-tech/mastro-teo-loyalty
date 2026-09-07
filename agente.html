@@ -1,1 +1,418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area Agenti — Mastro Teo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-deep:#1B4C82;
+    --blue:#2E6DB4;
+    --paper:#FDFCFA;
+    --cream:#F3F0E9;
+    --green:#3F7A4F;
+    --ink:#22242A;
+    --line:#DCD7CB;
+    --good:#3F7A4F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top left, rgba(46,109,180,0.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(63,122,79,0.07), transparent 55%),
+      var(--cream);
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 60px;
+  }
+  .card{
+    width:100%;
+    max-width:440px;
+    background:var(--paper);
+    border-radius:14px;
+    box-shadow:0 1px 0 rgba(27,76,130,0.04), 0 18px 40px -20px rgba(27,76,130,0.30);
+    overflow:hidden;
+  }
+  .head{
+    padding:26px 28px 14px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  .logo{ width:72px; height:auto; margin:0 auto 8px; display:block; }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:20px;
+    line-height:1.2;
+    margin:0;
+    color:var(--blue-deep);
+  }
+  .sottotitolo{ font-size:12px; color:var(--blue); margin:4px 0 0; font-weight:600; }
 
+  .tabs{
+    display:flex;
+    margin:16px 28px 0;
+    background:var(--cream);
+    border-radius:999px;
+    padding:4px;
+    gap:4px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 4px;
+    font-size:13px;
+    font-weight:600;
+    border-radius:999px;
+    cursor:pointer;
+    color:var(--blue-deep);
+    transition:background .2s ease, color .2s ease;
+    user-select:none;
+  }
+  .tab.active{ background:var(--blue-deep); color:var(--paper); }
+
+  .body{ padding:20px 28px 28px; }
+  .hidden{ display:none !important; }
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--blue-deep);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{ margin-top:0; }
+  input[type=text], input[type=number]{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+  }
+  input:focus{ outline:none; border-color:var(--blue); }
+
+  button{
+    font-family:inherit;
+    font-weight:600;
+    font-size:14.5px;
+    border:none;
+    border-radius:8px;
+    padding:12px 16px;
+    cursor:pointer;
+    transition:opacity .15s ease;
+  }
+  button:hover{ opacity:.9; }
+  button:active{ opacity:.75; }
+  button:disabled{ opacity:.5; cursor:default; }
+  .btn-primary{ background:var(--blue-deep); color:var(--paper); width:100%; margin-top:16px; }
+  .btn-secondary{ background:transparent; color:var(--blue-deep); border:1px solid var(--line); width:100%; margin-top:10px; }
+
+  .msg{ font-size:13px; margin-top:10px; padding:10px 12px; border-radius:8px; }
+  .msg.err{ background:rgba(178,52,52,0.08); color:#B23434; }
+  .msg.ok{ background:rgba(63,122,79,0.10); color:var(--good); }
+
+  .card-cliente{ margin-top:6px; }
+  .nome-cliente{ font-family:'Fraunces', serif; font-size:20px; font-weight:600; margin:0 0 2px; }
+  .sub-cliente{ font-size:12.5px; opacity:.6; margin:0 0 14px; }
+  .saldo-riga{ display:flex; align-items:baseline; gap:8px; margin:2px 0 18px; }
+  .saldo-num{ font-size:32px; font-weight:700; font-family:'Fraunces', serif; color:var(--blue-deep); }
+  .saldo-lbl{ font-size:13px; opacity:.65; }
+
+  .premio-azione{ margin-top:8px; }
+
+  .riepilogo{ font-size:12px; opacity:.6; margin:0 0 4px; }
+  .cliente-riga{ padding:12px 0; border-bottom:1px solid var(--line); }
+  .cliente-riga:last-child{ border-bottom:none; }
+  .cliente-riga-top{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .cliente-riga-nome{ font-weight:600; font-size:14px; }
+  .cliente-riga-saldo{ font-weight:700; color:var(--blue-deep); font-size:14px; white-space:nowrap; }
+  .cliente-riga-sub{ font-size:12px; opacity:.6; margin-top:2px; }
+  .cliente-riga-bar{ height:6px; background:var(--cream); border-radius:999px; overflow:hidden; margin-top:8px; border:1px solid var(--line); }
+  .cliente-riga-bar-fill{ height:100%; background:linear-gradient(90deg, var(--blue), var(--blue-deep)); border-radius:999px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="head">
+    <img class="logo" src="logo.png" alt="Le delizie di Mastro Teo">
+    <h1>Area Agenti</h1>
+    <p class="sottotitolo" id="nome-azienda"></p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="ordine">Registra ordine</div>
+    <div class="tab" data-view="agente">I miei clienti</div>
+  </div>
+
+  <div class="body">
+
+    <!-- REGISTRA ORDINE -->
+    <div id="view-ordine">
+      <label for="piva-ordine">Partita IVA cliente</label>
+      <input type="text" id="piva-ordine" placeholder="IT01234567890">
+      <button class="btn-primary" id="btn-cerca-ordine">Cerca cliente</button>
+      <div id="msg-ordine"></div>
+
+      <div id="ordine-nuovo" class="hidden">
+        <label for="rs-nuovo">Cliente non trovato — registralo</label>
+        <input type="text" id="rs-nuovo" placeholder="Ragione sociale (es. Bar Centrale Srl)">
+        <label for="citta-nuovo">Città (facoltativo)</label>
+        <input type="text" id="citta-nuovo" placeholder="Torino">
+        <label for="agente-rif-nuovo">Agente di riferimento</label>
+        <input type="text" id="agente-rif-nuovo" list="agenti-list" placeholder="Nome agente">
+        <button class="btn-primary" id="btn-registra-cliente">Registra nuovo cliente</button>
+      </div>
+
+      <div id="ordine-trovato" class="card-cliente hidden">
+        <p class="nome-cliente" id="oc-nome"></p>
+        <p class="sub-cliente" id="oc-sub"></p>
+        <div class="saldo-riga">
+          <span class="saldo-num" id="oc-saldo">0</span>
+          <span class="saldo-lbl">punti attuali</span>
+        </div>
+
+        <label for="importo-ordine">Importo ordine (€)</label>
+        <input type="number" id="importo-ordine" placeholder="0.00" min="0" step="0.01">
+        <label for="agente-ordine">Agente che registra l'ordine</label>
+        <input type="text" id="agente-ordine" list="agenti-list" placeholder="Nome agente">
+        <button class="btn-primary" id="btn-registra-ordine">Registra ordine</button>
+
+        <div id="oc-premio-azione" class="premio-azione hidden">
+          <div id="oc-premi-riscattabili"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- I MIEI CLIENTI -->
+    <div id="view-agente" class="hidden">
+      <label for="agente-nome-lista">Il tuo nome</label>
+      <input type="text" id="agente-nome-lista" list="agenti-list" placeholder="Nome agente">
+      <button class="btn-secondary" id="btn-vedi-clienti">Vedi i miei clienti</button>
+      <div id="msg-agente"></div>
+      <div id="lista-clienti-agente"></div>
+    </div>
+
+    <datalist id="agenti-list"></datalist>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+document.getElementById('nome-azienda').textContent = CONFIG.NOME_AZIENDA;
+document.getElementById('agenti-list').innerHTML = CONFIG.AGENTI.map(a => `<option value="${a}">`).join('');
+
+// ---------- TABS ----------
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const view = tab.dataset.view;
+    document.getElementById('view-ordine').classList.toggle('hidden', view!=='ordine');
+    document.getElementById('view-agente').classList.toggle('hidden', view!=='agente');
+  });
+});
+
+let clienteCorrente = null;
+
+async function creaCliente(cliente){
+  const res = await fetch(`${SHEETDB_BASE}?sheet=clienti`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ data: [cliente] })
+  });
+  if(!res.ok) throw new Error('Errore creazione cliente');
+  return res.json();
+}
+
+async function creaOrdine(ordine){
+  const res = await fetch(`${SHEETDB_BASE}?sheet=ordini`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ data: [ordine] })
+  });
+  if(!res.ok) throw new Error('Errore registrazione ordine');
+  return res.json();
+}
+
+async function mostraClienteOrdine(c){
+  document.getElementById('ordine-trovato').classList.remove('hidden');
+  document.getElementById('oc-nome').textContent = c.ragioneSociale;
+  document.getElementById('oc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
+
+  const ordini = await tuttiOrdiniCliente(c.piva);
+  const saldo = calcolaSaldo(ordini);
+  document.getElementById('oc-saldo').textContent = Math.round(saldo);
+
+  const sbloccati = CONFIG.PREMI.filter(p => saldo >= p.soglia);
+  document.getElementById('oc-premio-azione').classList.toggle('hidden', sbloccati.length === 0);
+  document.getElementById('oc-premi-riscattabili').innerHTML = sbloccati.map(p => `
+    <button class="btn-secondary btn-riscatta" data-soglia="${p.soglia}" data-nome="${p.nome}">
+      Riscatta: ${p.nome} (−${p.soglia} punti)
+    </button>`).join('');
+
+  if(!document.getElementById('agente-ordine').value){
+    document.getElementById('agente-ordine').value = c.agenteRif || '';
+  }
+}
+
+document.getElementById('btn-cerca-ordine').addEventListener('click', async ()=>{
+  const piva = document.getElementById('piva-ordine').value;
+  const msg = document.getElementById('msg-ordine');
+  document.getElementById('ordine-nuovo').classList.add('hidden');
+  document.getElementById('ordine-trovato').classList.add('hidden');
+  msg.textContent=''; msg.className='';
+  clienteCorrente = null;
+
+  if(!normPiva(piva)){ msg.className='msg err'; msg.textContent='Inserisci la Partita IVA.'; return; }
+
+  try{
+    const c = await trovaCliente(piva);
+    if(!c){ document.getElementById('ordine-nuovo').classList.remove('hidden'); return; }
+    clienteCorrente = c;
+    await mostraClienteOrdine(c);
+  }catch(e){
+    msg.className='msg err'; msg.textContent='Errore di connessione. Riprova tra poco.';
+  }
+});
+
+document.getElementById('btn-registra-cliente').addEventListener('click', async ()=>{
+  const piva = normPiva(document.getElementById('piva-ordine').value);
+  const ragioneSociale = document.getElementById('rs-nuovo').value.trim();
+  const citta = document.getElementById('citta-nuovo').value.trim();
+  const agenteRif = document.getElementById('agente-rif-nuovo').value.trim();
+  const msg = document.getElementById('msg-ordine');
+  if(!ragioneSociale){ return; }
+
+  const nuovo = { piva, ragioneSociale, citta, agenteRif };
+  try{
+    await creaCliente(nuovo);
+    clienteCorrente = nuovo;
+    document.getElementById('ordine-nuovo').classList.add('hidden');
+    document.getElementById('agente-ordine').value = agenteRif;
+    await mostraClienteOrdine(nuovo);
+  }catch(e){
+    msg.className='msg err'; msg.textContent='Errore nella creazione del cliente.';
+  }
+});
+
+document.getElementById('btn-registra-ordine').addEventListener('click', async ()=>{
+  if(!clienteCorrente) return;
+  const importo = parseFloat(document.getElementById('importo-ordine').value);
+  const agente = document.getElementById('agente-ordine').value.trim();
+  const msg = document.getElementById('msg-ordine');
+  const btn = document.getElementById('btn-registra-ordine');
+  if(!importo || importo <= 0){ msg.className='msg err'; msg.textContent='Inserisci un importo valido.'; return; }
+
+  const punti = Math.round(importo * CONFIG.PUNTI_PER_EURO);
+
+  btn.disabled = true; btn.textContent = 'Registrazione...';
+  try{
+    await creaOrdine({ piva: clienteCorrente.piva, importo, punti, agente, data: new Date().toLocaleDateString('it-IT') });
+    document.getElementById('importo-ordine').value = '';
+    msg.className='msg ok';
+    msg.textContent = `Registrati ${punti} punti${agente ? ' da ' + agente : ''}.`;
+    await mostraClienteOrdine(clienteCorrente);
+  }catch(e){
+    msg.className='msg err'; msg.textContent='Errore nella registrazione. Riprova.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Registra ordine';
+  }
+});
+
+document.getElementById('oc-premi-riscattabili').addEventListener('click', async (ev)=>{
+  const btn = ev.target.closest('.btn-riscatta');
+  if(!btn || !clienteCorrente) return;
+  const soglia = parseInt(btn.dataset.soglia);
+  const nomePremio = btn.dataset.nome;
+  const msg = document.getElementById('msg-ordine');
+
+  btn.disabled = true;
+  try{
+    await creaOrdine({ piva: clienteCorrente.piva, importo: 0, punti: -soglia, agente: '', data: new Date().toLocaleDateString('it-IT') + ' (riscattato: ' + nomePremio + ')' });
+    msg.className='msg ok'; msg.textContent = nomePremio + ' riscattato.';
+    await mostraClienteOrdine(clienteCorrente);
+  }catch(e){
+    msg.className='msg err'; msg.textContent='Errore nel riscatto. Riprova.';
+    btn.disabled = false;
+  }
+});
+
+// ---------- I MIEI CLIENTI ----------
+document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>{
+  const agente = document.getElementById('agente-nome-lista').value.trim();
+  const msg = document.getElementById('msg-agente');
+  const lista = document.getElementById('lista-clienti-agente');
+  const btn = document.getElementById('btn-vedi-clienti');
+  lista.innerHTML = '';
+  msg.textContent=''; msg.className='';
+
+  if(!agente){ msg.className='msg err'; msg.textContent='Inserisci il tuo nome.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Caricamento...';
+  try{
+    const url = `${SHEETDB_BASE}/search?sheet=clienti&agenteRif=${encodeURIComponent(agente)}`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Errore ricerca clienti');
+    const clienti = await res.json();
+
+    if(!clienti.length){
+      msg.className='msg err';
+      msg.textContent = `Nessun cliente assegnato a "${agente}".`;
+      return;
+    }
+
+    // Un'unica chiamata per tutti gli ordini, poi sommo i punti per ogni cliente localmente
+    const resOrdini = await fetch(`${SHEETDB_BASE}?sheet=ordini`);
+    if(!resOrdini.ok) throw new Error('Errore ricerca ordini');
+    const tuttiOrdini = await resOrdini.json();
+
+    clienti.forEach(c => {
+      c.saldoPunti = tuttiOrdini
+        .filter(o => normPiva(o.piva) === normPiva(c.piva))
+        .reduce((tot, o) => tot + (parseFloat(o.punti) || 0), 0);
+    });
+    clienti.sort((a,b)=> b.saldoPunti - a.saldoPunti);
+    const primoPremio = CONFIG.PREMI[0];
+    const ultimoPremio = CONFIG.PREMI[CONFIG.PREMI.length - 1];
+    const pronti = clienti.filter(c => c.saldoPunti >= primoPremio.soglia).length;
+
+    const riepilogo = document.createElement('p');
+    riepilogo.className = 'riepilogo';
+    riepilogo.textContent = `${clienti.length} client${clienti.length===1?'e':'i'} · ${pronti} con almeno un premio pronto`;
+    lista.appendChild(riepilogo);
+
+    clienti.forEach(c=>{
+      const pct = Math.max(0, Math.min(100, (c.saldoPunti / ultimoPremio.soglia) * 100));
+      const riga = document.createElement('div');
+      riga.className = 'cliente-riga';
+      riga.innerHTML = `
+        <div class="cliente-riga-top">
+          <span class="cliente-riga-nome">${c.ragioneSociale}</span>
+          <span class="cliente-riga-saldo">${Math.round(c.saldoPunti)} pt</span>
+        </div>
+        <div class="cliente-riga-sub">${[c.citta, c.piva].filter(Boolean).join(' · ')}</div>
+        <div class="cliente-riga-bar"><div class="cliente-riga-bar-fill" style="width:${pct}%"></div></div>
+      `;
+      lista.appendChild(riga);
+    });
+  }catch(e){
+    msg.className='msg err'; msg.textContent='Errore di connessione. Riprova tra poco.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Vedi i miei clienti';
+  }
+});
+</script>
+
+</body>
+</html>
