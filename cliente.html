@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il mio saldo — Mastro Teo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-deep:#1B4C82;
+    --blue:#2E6DB4;
+    --paper:#FDFCFA;
+    --cream:#F3F0E9;
+    --green:#3F7A4F;
+    --ink:#22242A;
+    --line:#DCD7CB;
+    --good:#3F7A4F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top left, rgba(46,109,180,0.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(63,122,79,0.07), transparent 55%),
+      var(--cream);
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 60px;
+  }
+  .card{
+    width:100%;
+    max-width:420px;
+    background:var(--paper);
+    border-radius:14px;
+    box-shadow:0 1px 0 rgba(27,76,130,0.04), 0 18px 40px -20px rgba(27,76,130,0.30);
+    overflow:hidden;
+  }
+  .head{
+    padding:28px 28px 16px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  .logo{ width:96px; height:auto; margin:0 auto 10px; display:block; }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    line-height:1.2;
+    margin:0;
+    color:var(--blue-deep);
+  }
+  .sottotitolo{
+    font-size:12.5px;
+    color:var(--blue);
+    margin:4px 0 0;
+    font-weight:600;
+  }
+
+  .body{ padding:22px 28px 30px; }
+  .hidden{ display:none !important; }
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--blue-deep);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{ margin-top:0; }
+  input[type=text]{
+    width:100%;
+    padding:12px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+  }
+  input:focus{ outline:none; border-color:var(--blue); }
+
+  button{
+    font-family:inherit;
+    font-weight:600;
+    font-size:14.5px;
+    border:none;
+    border-radius:8px;
+    padding:13px 16px;
+    cursor:pointer;
+    transition:opacity .15s ease;
+    width:100%;
+    margin-top:16px;
+  }
+  button:hover{ opacity:.9; }
+  button:active{ opacity:.75; }
+  .btn-primary{ background:var(--blue-deep); color:var(--paper); }
+  .btn-primary:disabled{ opacity:.5; cursor:default; }
+
+  .hint{ font-size:11.5px; opacity:.55; margin:8px 0 0; text-align:center; }
+
+  .msg{ font-size:13px; margin-top:14px; padding:11px 12px; border-radius:8px; }
+  .msg.err{ background:rgba(178,52,52,0.08); color:#B23434; }
+  .msg.ok{ background:rgba(63,122,79,0.10); color:var(--good); }
+
+  .risultato{ margin-top:22px; }
+  .nome-cliente{
+    font-family:'Fraunces', serif;
+    font-size:21px;
+    font-weight:600;
+    margin:0 0 2px;
+  }
+  .sub-cliente{ font-size:12.5px; opacity:.6; margin:0 0 16px; }
+
+  .saldo-riga{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin:0 0 18px;
+  }
+  .saldo-num{ font-size:36px; font-weight:700; font-family:'Fraunces', serif; color:var(--blue-deep); }
+  .saldo-lbl{ font-size:13px; opacity:.65; }
+
+  .bar-track{
+    width:100%;
+    height:14px;
+    background:var(--cream);
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .bar-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--blue), var(--blue-deep));
+    border-radius:999px;
+    transition:width 1.1s cubic-bezier(.22,.9,.3,1);
+  }
+  .bar-caption{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    margin-top:8px;
+    opacity:.75;
+  }
+  .premio-pronto{
+    margin-top:14px;
+    padding:12px 14px;
+    background:rgba(63,122,79,0.10);
+    color:var(--good);
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    text-align:center;
+  }
+
+  .premi-lista{ margin-top:24px; }
+  .premi-lista h3{
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin:0 0 8px;
+    font-weight:600;
+  }
+  .premio-riga{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .premio-riga:last-child{ border-bottom:none; }
+  .premio-check{
+    width:20px; height:20px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    font-weight:700;
+  }
+  .premio-check.ok{ background:var(--good); color:var(--paper); }
+  .premio-check.no{ background:var(--cream); color:var(--blue-deep); border:1px solid var(--line); }
+  .premio-testo{ flex:1; }
+  .premio-nome{ font-size:13.5px; font-weight:600; }
+  .premio-stato{ font-size:12px; opacity:.6; margin-top:1px; }
+
+  .storico{ margin-top:24px; }
+  .storico h3{
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin:0 0 8px;
+    font-weight:600;
+  }
+  .storico-riga{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    padding:8px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .storico-riga:last-child{ border-bottom:none; }
+  .storico-riga span:last-child{ color:var(--blue-deep); font-weight:600; }
+  .vuoto{ font-size:13px; opacity:.55; text-align:center; padding:14px 0; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="head">
+    <img class="logo" src="logo.png" alt="Le delizie di Mastro Teo">
+    <h1>Il mio saldo punti</h1>
+    <p class="sottotitolo" id="nome-azienda"></p>
+  </div>
+
+  <div class="body">
+    <label for="piva">Partita IVA della tua attività</label>
+    <input type="text" id="piva" placeholder="IT01234567890">
+    <button class="btn-primary" id="btn-verifica">Verifica saldo</button>
+    <p class="hint">La P.IVA ti è stata data dal tuo agente al momento dell'iscrizione.</p>
+
+    <div id="msg"></div>
+
+    <div id="risultato" class="risultato hidden">
+      <p class="nome-cliente" id="rc-nome"></p>
+      <p class="sub-cliente" id="rc-sub"></p>
+      <div class="saldo-riga">
+        <span class="saldo-num" id="rc-saldo">0</span>
+        <span class="saldo-lbl">punti</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="rc-bar"></div></div>
+      <div class="bar-caption">
+        <span id="rc-caption-left">0 punti</span>
+        <span id="rc-caption-right">obiettivo</span>
+      </div>
+      <div id="rc-premio-pronto" class="premio-pronto hidden"></div>
+
+      <div class="premi-lista">
+        <h3>Premi</h3>
+        <div id="rc-premi"></div>
+      </div>
+
+      <div class="storico">
+        <h3>Ultimi ordini</h3>
+        <div id="rc-storico"><p class="vuoto">Nessun ordine ancora</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+document.getElementById('nome-azienda').textContent = CONFIG.NOME_AZIENDA;
+
+document.getElementById('btn-verifica').addEventListener('click', async ()=>{
+  const piva = document.getElementById('piva').value;
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('btn-verifica');
+  document.getElementById('risultato').classList.add('hidden');
+  msg.textContent = ''; msg.className = '';
+
+  if(!normPiva(piva)){ msg.className='msg err'; msg.textContent='Inserisci la Partita IVA.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Verifica in corso...';
+  try{
+    const c = await trovaCliente(piva);
+    if(!c){
+      msg.className='msg err';
+      msg.textContent='Nessun cliente trovato con questa Partita IVA. Contatta il tuo agente.';
+      return;
+    }
+
+    const saldo = parseFloat(c.saldoPunti) || 0;
+    document.getElementById('risultato').classList.remove('hidden');
+    document.getElementById('rc-nome').textContent = c.ragioneSociale;
+    document.getElementById('rc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
+    document.getElementById('rc-saldo').textContent = Math.round(saldo);
+
+    const prossimo = CONFIG.PREMI.find(p => saldo < p.soglia);
+    const massimo = CONFIG.PREMI[CONFIG.PREMI.length - 1];
+    const obiettivo = prossimo || massimo;
+    const pct = Math.max(0, Math.min(100, (saldo / obiettivo.soglia) * 100));
+    requestAnimationFrame(()=>{ document.getElementById('rc-bar').style.width = pct + '%'; });
+    document.getElementById('rc-caption-left').textContent = Math.round(saldo) + ' punti';
+    document.getElementById('rc-caption-right').textContent = prossimo
+      ? 'mancano ' + Math.ceil(prossimo.soglia - saldo) + ' punti a: ' + prossimo.nome.toLowerCase()
+      : 'tutti i premi raggiunti';
+
+    const pronto = document.getElementById('rc-premio-pronto');
+    const ultimoSbloccato = [...CONFIG.PREMI].reverse().find(p => saldo >= p.soglia);
+    pronto.classList.toggle('hidden', !ultimoSbloccato);
+    pronto.textContent = ultimoSbloccato ? ultimoSbloccato.nome + ' raggiunto — parlane col tuo agente.' : '';
+
+    document.getElementById('rc-premi').innerHTML = CONFIG.PREMI.map(p => {
+      const ok = saldo >= p.soglia;
+      return `
+        <div class="premio-riga">
+          <div class="premio-check ${ok ? 'ok' : 'no'}">${ok ? '✓' : ''}</div>
+          <div class="premio-testo">
+            <div class="premio-nome">${p.nome}</div>
+            <div class="premio-stato">${ok ? 'Raggiunto · ' + p.soglia + ' punti' : 'Mancano ' + Math.ceil(p.soglia - saldo) + ' punti (' + p.soglia + ' totali)'}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const ordini = await ordiniCliente(piva, 5);
+    const storicoEl = document.getElementById('rc-storico');
+    storicoEl.innerHTML = ordini.length
+      ? ordini.map(o => `<div class="storico-riga"><span>${o.data}</span><span>${o.punti>=0?'+':''}${o.punti} pt${o.importo && parseFloat(o.importo) ? ' · €'+parseFloat(o.importo).toFixed(2) : ''}</span></div>`).join('')
+      : '<p class="vuoto">Nessun ordine ancora</p>';
+  }catch(e){
+    msg.className='msg err';
+    msg.textContent='Errore di connessione. Riprova tra poco.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Verifica saldo';
+  }
+});
+</script>
+
+</body>
+</html>
