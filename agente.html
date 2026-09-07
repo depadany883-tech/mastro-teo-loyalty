@@ -235,16 +235,6 @@ async function creaCliente(cliente){
   return res.json();
 }
 
-async function aggiornaCliente(piva, campi){
-  const res = await fetch(`${SHEETDB_BASE}/piva/${encodeURIComponent(normPiva(piva))}?sheet=clienti`, {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ data: campi })
-  });
-  if(!res.ok) throw new Error('Errore aggiornamento cliente');
-  return res.json();
-}
-
 async function creaOrdine(ordine){
   const res = await fetch(`${SHEETDB_BASE}?sheet=ordini`, {
     method: 'POST',
@@ -255,11 +245,13 @@ async function creaOrdine(ordine){
   return res.json();
 }
 
-function mostraClienteOrdine(c){
+async function mostraClienteOrdine(c){
   document.getElementById('ordine-trovato').classList.remove('hidden');
   document.getElementById('oc-nome').textContent = c.ragioneSociale;
   document.getElementById('oc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
-  const saldo = parseFloat(c.saldoPunti) || 0;
+
+  const ordini = await tuttiOrdiniCliente(c.piva);
+  const saldo = calcolaSaldo(ordini);
   document.getElementById('oc-saldo').textContent = Math.round(saldo);
 
   const sbloccati = CONFIG.PREMI.filter(p => saldo >= p.soglia);
@@ -288,7 +280,7 @@ document.getElementById('btn-cerca-ordine').addEventListener('click', async ()=>
     const c = await trovaCliente(piva);
     if(!c){ document.getElementById('ordine-nuovo').classList.remove('hidden'); return; }
     clienteCorrente = c;
-    mostraClienteOrdine(c);
+    await mostraClienteOrdine(c);
   }catch(e){
     msg.className='msg err'; msg.textContent='Errore di connessione. Riprova tra poco.';
   }
@@ -302,13 +294,13 @@ document.getElementById('btn-registra-cliente').addEventListener('click', async 
   const msg = document.getElementById('msg-ordine');
   if(!ragioneSociale){ return; }
 
-  const nuovo = { piva, ragioneSociale, citta, agenteRif, saldoPunti: 0, totaleSpeso: 0 };
+  const nuovo = { piva, ragioneSociale, citta, agenteRif };
   try{
     await creaCliente(nuovo);
     clienteCorrente = nuovo;
     document.getElementById('ordine-nuovo').classList.add('hidden');
     document.getElementById('agente-ordine').value = agenteRif;
-    mostraClienteOrdine(nuovo);
+    await mostraClienteOrdine(nuovo);
   }catch(e){
     msg.className='msg err'; msg.textContent='Errore nella creazione del cliente.';
   }
@@ -323,19 +315,14 @@ document.getElementById('btn-registra-ordine').addEventListener('click', async (
   if(!importo || importo <= 0){ msg.className='msg err'; msg.textContent='Inserisci un importo valido.'; return; }
 
   const punti = Math.round(importo * CONFIG.PUNTI_PER_EURO);
-  const nuovoSaldo = (parseFloat(clienteCorrente.saldoPunti) || 0) + punti;
-  const nuovoTotale = (parseFloat(clienteCorrente.totaleSpeso) || 0) + importo;
 
   btn.disabled = true; btn.textContent = 'Registrazione...';
   try{
     await creaOrdine({ piva: clienteCorrente.piva, importo, punti, agente, data: new Date().toLocaleDateString('it-IT') });
-    await aggiornaCliente(clienteCorrente.piva, { saldoPunti: nuovoSaldo, totaleSpeso: nuovoTotale });
-    clienteCorrente.saldoPunti = nuovoSaldo;
-    clienteCorrente.totaleSpeso = nuovoTotale;
     document.getElementById('importo-ordine').value = '';
     msg.className='msg ok';
-    msg.textContent = `Registrati ${punti} punti${agente ? ' da ' + agente : ''}. Nuovo saldo: ${Math.round(nuovoSaldo)}.`;
-    mostraClienteOrdine(clienteCorrente);
+    msg.textContent = `Registrati ${punti} punti${agente ? ' da ' + agente : ''}.`;
+    await mostraClienteOrdine(clienteCorrente);
   }catch(e){
     msg.className='msg err'; msg.textContent='Errore nella registrazione. Riprova.';
   }finally{
@@ -349,15 +336,12 @@ document.getElementById('oc-premi-riscattabili').addEventListener('click', async
   const soglia = parseInt(btn.dataset.soglia);
   const nomePremio = btn.dataset.nome;
   const msg = document.getElementById('msg-ordine');
-  const nuovoSaldo = (parseFloat(clienteCorrente.saldoPunti) || 0) - soglia;
 
   btn.disabled = true;
   try{
     await creaOrdine({ piva: clienteCorrente.piva, importo: 0, punti: -soglia, agente: '', data: new Date().toLocaleDateString('it-IT') + ' (riscattato: ' + nomePremio + ')' });
-    await aggiornaCliente(clienteCorrente.piva, { saldoPunti: nuovoSaldo });
-    clienteCorrente.saldoPunti = nuovoSaldo;
     msg.className='msg ok'; msg.textContent = nomePremio + ' riscattato.';
-    mostraClienteOrdine(clienteCorrente);
+    await mostraClienteOrdine(clienteCorrente);
   }catch(e){
     msg.className='msg err'; msg.textContent='Errore nel riscatto. Riprova.';
     btn.disabled = false;
@@ -388,7 +372,16 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
       return;
     }
 
-    clienti.forEach(c => c.saldoPunti = parseFloat(c.saldoPunti) || 0);
+    // Un'unica chiamata per tutti gli ordini, poi sommo i punti per ogni cliente localmente
+    const resOrdini = await fetch(`${SHEETDB_BASE}?sheet=ordini`);
+    if(!resOrdini.ok) throw new Error('Errore ricerca ordini');
+    const tuttiOrdini = await resOrdini.json();
+
+    clienti.forEach(c => {
+      c.saldoPunti = tuttiOrdini
+        .filter(o => normPiva(o.piva) === normPiva(c.piva))
+        .reduce((tot, o) => tot + (parseFloat(o.punti) || 0), 0);
+    });
     clienti.sort((a,b)=> b.saldoPunti - a.saldoPunti);
     const primoPremio = CONFIG.PREMI[0];
     const ultimoPremio = CONFIG.PREMI[CONFIG.PREMI.length - 1];

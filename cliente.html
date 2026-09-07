@@ -278,7 +278,8 @@ document.getElementById('btn-verifica').addEventListener('click', async ()=>{
       return;
     }
 
-    const saldo = parseFloat(c.saldoPunti) || 0;
+    const ordini = await tuttiOrdiniCliente(piva);
+    const saldo = calcolaSaldo(ordini);
     document.getElementById('risultato').classList.remove('hidden');
     document.getElementById('rc-nome').textContent = c.ragioneSociale;
     document.getElementById('rc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
@@ -311,10 +312,10 @@ document.getElementById('btn-verifica').addEventListener('click', async ()=>{
         </div>`;
     }).join('');
 
-    const ordini = await ordiniCliente(piva, 5);
     const storicoEl = document.getElementById('rc-storico');
-    storicoEl.innerHTML = ordini.length
-      ? ordini.map(o => `<div class="storico-riga"><span>${o.data}</span><span>${o.punti>=0?'+':''}${o.punti} pt${o.importo && parseFloat(o.importo) ? ' · €'+parseFloat(o.importo).toFixed(2) : ''}</span></div>`).join('')
+    const ultimi = ordini.slice(0, 5);
+    storicoEl.innerHTML = ultimi.length
+      ? ultimi.map(o => `<div class="storico-riga"><span>${o.data}</span><span>${o.punti>=0?'+':''}${o.punti} pt${o.importo && parseFloat(o.importo) ? ' · €'+parseFloat(o.importo).toFixed(2) : ''}</span></div>`).join('')
       : '<p class="vuoto">Nessun ordine ancora</p>';
   }catch(e){
     msg.className='msg err';

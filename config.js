@@ -40,12 +40,18 @@ async function trovaCliente(piva){
   return rows && rows.length ? rows[0] : null;
 }
 
-// Helper: recupera gli ultimi ordini di un cliente, più recenti prima
-async function ordiniCliente(piva, limite = 5){
+// Helper: recupera TUTTI gli ordini di un cliente (per calcolare il saldo)
+async function tuttiOrdiniCliente(piva){
   const url = `${SHEETDB_BASE}/search?sheet=ordini&piva=${encodeURIComponent(normPiva(piva))}`;
   const res = await fetch(url);
   if(!res.ok) throw new Error("Errore ricerca ordini");
   const rows = await res.json();
   rows.sort((a, b) => new Date(b.data) - new Date(a.data));
-  return rows.slice(0, limite);
+  return rows;
+}
+
+// Il saldo NON è un campo salvato — è sempre la somma dei punti di tutti gli ordini.
+// Evita ogni problema di sincronizzazione: non c'è nulla da "aggiornare".
+function calcolaSaldo(ordini){
+  return ordini.reduce((tot, o) => tot + (parseFloat(o.punti) || 0), 0);
 }
