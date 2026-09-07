@@ -20,6 +20,8 @@ const CONFIG = {
     { soglia: 200, nome: "10€ di sconto" },
     { soglia: 350, nome: "20€ di sconto" },
     { soglia: 600, nome: "2 scatole omaggio" },
+    { soglia: 800, nome: "30% di sconto in fattura" },
+    { soglia: 5000, nome: "10 scatole omaggio" },
   ],
   NOME_AZIENDA: "Le delizie di Mastro Teo",
   AGENTI: ["Marco", "Luca", "Sara"], // modifica con i nomi reali dei tuoi agenti
