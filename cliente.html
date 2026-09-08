@@ -46,8 +46,44 @@
     padding:28px 28px 16px;
     text-align:center;
     border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
   }
-  .logo{ width:96px; height:auto; margin:0 auto 10px; display:block; }
+  .hero{
+    height:120px;
+    margin:-1px -1px 0;
+    background:
+      radial-gradient(circle at 15% 30%, rgba(255,255,255,0.35) 0, transparent 3%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0, transparent 2.5%),
+      radial-gradient(circle at 60% 70%, rgba(255,255,255,0.3) 0, transparent 2.5%),
+      radial-gradient(circle at 30% 80%, rgba(255,255,255,0.3) 0, transparent 2%),
+      linear-gradient(135deg, var(--blue-deep), var(--blue) 55%, #C98A2C 130%);
+    position:relative;
+    overflow:hidden;
+  }
+  .coriandolo{
+    position:absolute;
+    border-radius:2px;
+    opacity:0;
+    animation:cadi 1.4s ease-out forwards;
+  }
+  @keyframes cadi{
+    0%{ opacity:0; transform:translateY(-30px) rotate(0deg); }
+    15%{ opacity:1; }
+    100%{ opacity:1; transform:translateY(0) rotate(var(--rot)); }
+  }
+  .badge-vittoria{
+    width:104px; height:104px;
+    border-radius:50%;
+    background:var(--paper);
+    border:4px solid var(--paper);
+    box-shadow:0 8px 20px -6px rgba(27,76,130,0.45);
+    margin:-58px auto 10px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    z-index:2;
+  }
+  .logo{ width:88px; height:auto; display:block; margin:0; }
   h1{
     font-family:'Fraunces', serif;
     font-weight:600;
@@ -238,7 +274,10 @@
 
 <div class="card">
   <div class="head">
-    <img class="logo" src="logo.png" alt="Le delizie di Mastro Teo">
+    <div class="hero" id="hero"></div>
+    <div class="badge-vittoria">
+      <img class="logo" src="logo.png" alt="Le delizie di Mastro Teo">
+    </div>
     <h1>Il mio saldo punti</h1>
     <p class="sottotitolo" id="nome-azienda"></p>
   </div>
@@ -281,6 +320,25 @@
 <script src="config.js"></script>
 <script>
 document.getElementById('nome-azienda').textContent = CONFIG.NOME_AZIENDA;
+
+// Coriandoli generati via JS: posizione, colore e rotazione variabili per un effetto naturale
+(function(){
+  const colori = ['#FFFFFF', '#C98A2C', '#FFFFFF', '#1B4C82', '#FFFFFF'];
+  const hero = document.getElementById('hero');
+  for(let i = 0; i < 22; i++){
+    const c = document.createElement('div');
+    c.className = 'coriandolo';
+    const size = 5 + Math.random() * 5;
+    c.style.width = size + 'px';
+    c.style.height = (size * 0.4) + 'px';
+    c.style.left = Math.random() * 100 + '%';
+    c.style.top = Math.random() * 70 + '%';
+    c.style.background = colori[Math.floor(Math.random() * colori.length)];
+    c.style.setProperty('--rot', (Math.random() * 360 - 180) + 'deg');
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    hero.appendChild(c);
+  }
+})();
 
 document.getElementById('btn-verifica').addEventListener('click', async ()=>{
   const piva = document.getElementById('piva').value;
