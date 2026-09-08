@@ -91,7 +91,7 @@
     margin:14px 0 6px;
   }
   label:first-of-type{ margin-top:0; }
-  input[type=text], input[type=number]{
+  input[type=text], input[type=number], select{
     width:100%;
     padding:11px 12px;
     border:1px solid var(--line);
@@ -101,6 +101,7 @@
     font-size:15px;
     color:var(--ink);
   }
+  select{ appearance:none; -webkit-appearance:none; }
   input:focus{ outline:none; border-color:var(--blue); }
 
   button{
@@ -175,6 +176,12 @@
         <input type="text" id="citta-nuovo" placeholder="Torino">
         <label for="agente-rif-nuovo">Agente di riferimento</label>
         <input type="text" id="agente-rif-nuovo" list="agenti-list" placeholder="Nome agente">
+        <label for="listino-nuovo">Listino</label>
+        <select id="listino-nuovo">
+          <option value="" disabled selected>Scegli il listino...</option>
+          <option value="A">Listino A — prezzo pieno</option>
+          <option value="B">Listino B — prezzo scontato</option>
+        </select>
         <button class="btn-primary" id="btn-registra-cliente">Registra nuovo cliente</button>
       </div>
 
@@ -250,16 +257,17 @@ async function creaOrdine(ordine){
 async function mostraClienteOrdine(c){
   document.getElementById('ordine-trovato').classList.remove('hidden');
   document.getElementById('oc-nome').textContent = c.ragioneSociale;
-  document.getElementById('oc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
+  document.getElementById('oc-sub').textContent = [c.citta, c.piva, c.listino ? 'Listino ' + c.listino : ''].filter(Boolean).join(' · ');
 
   const ordini = await tuttiOrdiniCliente(c.piva);
   const saldo = calcolaSaldo(ordini);
   document.getElementById('oc-saldo').textContent = Math.round(saldo);
 
-  const sbloccati = CONFIG.PREMI.filter(p => saldo >= p.soglia);
+  const sbloccati = premiPerListino(c.listino).filter(p => saldo >= p.soglia);
   document.getElementById('oc-premio-azione').classList.toggle('hidden', sbloccati.length === 0);
   document.getElementById('oc-premi-riscattabili').innerHTML = sbloccati.map(p => {
-    const posizioneDallaFine = CONFIG.PREMI.length - CONFIG.PREMI.indexOf(p);
+    const premi = premiPerListino(c.listino);
+    const posizioneDallaFine = premi.length - premi.indexOf(p);
     const classeSpeciale = posizioneDallaFine === 2 ? 'oro' : (posizioneDallaFine === 1 ? 'top' : '');
     return `
     <button class="btn-secondary btn-riscatta ${classeSpeciale}" data-soglia="${p.soglia}" data-nome="${p.nome}">
@@ -297,10 +305,12 @@ document.getElementById('btn-registra-cliente').addEventListener('click', async 
   const ragioneSociale = document.getElementById('rs-nuovo').value.trim();
   const citta = document.getElementById('citta-nuovo').value.trim();
   const agenteRif = document.getElementById('agente-rif-nuovo').value.trim();
+  const listino = document.getElementById('listino-nuovo').value;
   const msg = document.getElementById('msg-ordine');
   if(!ragioneSociale){ return; }
+  if(!listino){ msg.className='msg err'; msg.textContent='Scegli il listino (A o B) prima di registrare.'; return; }
 
-  const nuovo = { piva, ragioneSociale, citta, agenteRif };
+  const nuovo = { piva, ragioneSociale, citta, agenteRif, listino };
   try{
     await creaCliente(nuovo);
     clienteCorrente = nuovo;
@@ -390,8 +400,8 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
         .reduce((tot, o) => tot + (parseFloat(o.punti) || 0), 0);
     });
     clienti.sort((a,b)=> b.saldoPunti - a.saldoPunti);
-    const primoPremio = CONFIG.PREMI[0];
-    const ultimoPremio = CONFIG.PREMI[CONFIG.PREMI.length - 1];
+    const primoPremio = CONFIG.PREMI_A[0];
+    const ultimoPremio = CONFIG.PREMI_A[CONFIG.PREMI_A.length - 1];
     const pronti = clienti.filter(c => c.saldoPunti >= primoPremio.soglia).length;
 
     const riepilogo = document.createElement('p');
@@ -408,7 +418,7 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
           <span class="cliente-riga-nome">${c.ragioneSociale}</span>
           <span class="cliente-riga-saldo">${Math.round(c.saldoPunti)} pt</span>
         </div>
-        <div class="cliente-riga-sub">${[c.citta, c.piva].filter(Boolean).join(' · ')}</div>
+        <div class="cliente-riga-sub">${[c.citta, c.piva, c.listino ? 'Listino ' + c.listino : ''].filter(Boolean).join(' · ')}</div>
         <div class="cliente-riga-bar"><div class="cliente-riga-bar-fill" style="width:${pct}%"></div></div>
       `;
       lista.appendChild(riga);

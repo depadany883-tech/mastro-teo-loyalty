@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il mio saldo — Mastro Teo</title>
-<link rel="icon" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -307,8 +307,9 @@ document.getElementById('btn-verifica').addEventListener('click', async ()=>{
     document.getElementById('rc-sub').textContent = [c.citta, c.piva].filter(Boolean).join(' · ');
     document.getElementById('rc-saldo').textContent = Math.round(saldo);
 
-    const prossimo = CONFIG.PREMI.find(p => saldo < p.soglia);
-    const massimo = CONFIG.PREMI[CONFIG.PREMI.length - 1];
+    const premi = premiPerListino(c.listino);
+    const prossimo = premi.find(p => saldo < p.soglia);
+    const massimo = premi[premi.length - 1];
     const obiettivo = prossimo || massimo;
     const pct = Math.max(0, Math.min(100, (saldo / obiettivo.soglia) * 100));
     requestAnimationFrame(()=>{ document.getElementById('rc-bar').style.width = pct + '%'; });
@@ -318,13 +319,13 @@ document.getElementById('btn-verifica').addEventListener('click', async ()=>{
       : 'tutti i premi raggiunti';
 
     const pronto = document.getElementById('rc-premio-pronto');
-    const ultimoSbloccato = [...CONFIG.PREMI].reverse().find(p => saldo >= p.soglia);
+    const ultimoSbloccato = [...premi].reverse().find(p => saldo >= p.soglia);
     pronto.classList.toggle('hidden', !ultimoSbloccato);
     pronto.textContent = ultimoSbloccato ? ultimoSbloccato.nome + ' raggiunto — parlane col tuo agente.' : '';
 
-    document.getElementById('rc-premi').innerHTML = CONFIG.PREMI.map((p, i) => {
+    document.getElementById('rc-premi').innerHTML = premi.map((p, i) => {
       const ok = saldo >= p.soglia;
-      const posizioneDallaFine = CONFIG.PREMI.length - i;
+      const posizioneDallaFine = premi.length - i;
       const classeSpeciale = posizioneDallaFine === 2 ? 'oro' : (posizioneDallaFine === 1 ? 'top' : '');
       return `
         <div class="premio-riga ${classeSpeciale}">

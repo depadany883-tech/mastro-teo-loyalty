@@ -14,20 +14,34 @@ const CONFIG = {
   // Nomi delle colonne ESATTI (case-sensitive), altrimenti SheetDB non li riconosce.
 
   PUNTI_PER_EURO: 1,
-  // Premi a soglie crescenti — aggiungine o modificane quanti vuoi.
-  // "soglia" = punti necessari, "nome" = cosa riceve il cliente.
-  PREMI: [
+  // Premi a soglie crescenti — LISTINO A (prezzo pieno, senza sconto).
+  PREMI_A: [
     { soglia: 200, nome: "10€ di sconto" },
     { soglia: 350, nome: "20€ di sconto" },
     { soglia: 600, nome: "2 scatole omaggio" },
-    { soglia: 800, nome: "30% di sconto in fattura" },
+    { soglia: 800, nome: "30% di sconto in fattura (fino a 45€ max)" },
     { soglia: 5000, nome: "10 scatole omaggio" },
+  ],
+  // LISTINO B (prezzo scontato) — stesse soglie, premio dimezzato: margine più basso, stesso sforzo.
+  PREMI_B: [
+    { soglia: 200, nome: "5€ di sconto" },
+    { soglia: 350, nome: "10€ di sconto" },
+    { soglia: 600, nome: "1 scatola omaggio" },
+    { soglia: 800, nome: "15% di sconto in fattura (fino a 22€ max)" },
+    { soglia: 5000, nome: "5 scatole omaggio" },
   ],
   NOME_AZIENDA: "Le delizie di Mastro Teo",
   AGENTI: ["Marco", "Luca", "Sara"], // modifica con i nomi reali dei tuoi agenti
 };
 
-CONFIG.PREMI.sort((a, b) => a.soglia - b.soglia);
+CONFIG.PREMI_A.sort((a, b) => a.soglia - b.soglia);
+CONFIG.PREMI_B.sort((a, b) => a.soglia - b.soglia);
+
+// Restituisce l'elenco premi giusto in base al listino del cliente ("A" o "B").
+// Le soglie sono identiche tra i due listini — cambia solo il premio.
+function premiPerListino(listino){
+  return listino === 'B' ? CONFIG.PREMI_B : CONFIG.PREMI_A;
+}
 
 const SHEETDB_BASE = `https://sheetdb.io/api/v1/${CONFIG.SHEETDB_API_ID}`;
 
