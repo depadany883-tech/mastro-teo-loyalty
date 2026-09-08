@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Area Agenti — Mastro Teo</title>
-<link rel="icon" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -367,9 +367,12 @@ document.getElementById('btn-vedi-clienti').addEventListener('click', async ()=>
 
   btn.disabled = true; btn.textContent = 'Caricamento...';
   try{
-    const url = `${SHEETDB_BASE}/search?sheet=clienti&agenteRif=${encodeURIComponent(agente)}`;
+    // Scarico tutti i clienti e filtro qui — evita l'endpoint /search per colonna,
+    // che può restare "in cache" su SheetDB e non riconoscere colonne aggiornate di recente.
+    const url = `${SHEETDB_BASE}?sheet=clienti`;
     const res = await sheetdbFetch(url);
-    const clienti = await res.json();
+    const tuttiClienti = await res.json();
+    const clienti = tuttiClienti.filter(c => (c.agenteRif || '').trim().toLowerCase() === agente.trim().toLowerCase());
 
     if(!clienti.length){
       msg.className='msg err';
